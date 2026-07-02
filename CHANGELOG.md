@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 - 2026-07-02
+
+- Bumped dashboard asset cache keys so upgraded installs load the latest profile renderer immediately
+
 ## 0.1.2 - 2026-07-02
 
 - Added local Codex account metadata sync through `account/read`
