@@ -8,6 +8,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync
@@ -61,6 +62,19 @@ function run(command, commandArgs, options = {}) {
   return result;
 }
 
+function currentUid() {
+  return String(process.getuid?.() || run("/usr/bin/id", ["-u"], { quiet: true }).stdout.trim());
+}
+
+function readJsonFile(filePath) {
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, "utf8"));
+  } catch (_) {
+    return null;
+  }
+}
+
 function copyDirectory(source, target) {
   mkdirSync(target, { recursive: true });
   for (const entry of readdirSync(source)) {
@@ -79,11 +93,49 @@ function writePlist(filePath, payload) {
   run("/usr/bin/plutil", ["-lint", filePath]);
 }
 
+function bootoutPlist(plistPath) {
+  run("/bin/launchctl", ["bootout", `gui/${currentUid()}`, plistPath], { allowFailure: true, quiet: true });
+}
+
 function launchAgent(label, plistPath) {
-  const uid = String(process.getuid?.() || run("/usr/bin/id", ["-u"], { quiet: true }).stdout.trim());
+  const uid = currentUid();
   run("/bin/launchctl", ["bootout", `gui/${uid}`, plistPath], { allowFailure: true, quiet: true });
   run("/bin/launchctl", ["bootstrap", `gui/${uid}`, plistPath]);
   run("/bin/launchctl", ["kickstart", "-k", `gui/${uid}/${label}`], { allowFailure: true, quiet: true });
+}
+
+function parsePort(value, label) {
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`${label} must be a TCP port between 1 and 65535.`);
+  }
+  return port;
+}
+
+function parsePortList(value, label) {
+  if (value == null || value === true) return [];
+  return String(value)
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => parsePort(part, label));
+}
+
+function legacyLaunchAgentLabels() {
+  return ["com.lukeji.codex-usage-panel-server", "com.lukeji.codex-usage-panel-sync"];
+}
+
+function disableLegacyLaunchAgents(launchAgentsDir) {
+  const disabledDir = path.join(homedir(), "Library", "LaunchAgents.disabled");
+  for (const label of legacyLaunchAgentLabels()) {
+    const plistPath = path.join(launchAgentsDir, `${label}.plist`);
+    bootoutPlist(plistPath);
+    if (!existsSync(plistPath)) continue;
+    mkdirSync(disabledDir, { recursive: true });
+    const disabledPath = path.join(disabledDir, `${label}.plist.disabled-${Date.now()}`);
+    renameSync(plistPath, disabledPath);
+    console.log(`Disabled legacy LaunchAgent: ${disabledPath}`);
+  }
 }
 
 function canBindPort(port) {
@@ -114,14 +166,13 @@ async function resolvePort(requestedPort, mayFallback) {
 }
 
 const installRoot = path.resolve(expandHome(args.get("--root") || defaultRoot));
-const requestedPortArg = args.get("--port");
-const port = await resolvePort(Number(requestedPortArg || defaultPort), !requestedPortArg);
 const intervalMs = Number(args.get("--interval") || defaultIntervalMs);
 const openAfterInstall = args.has("--open");
 const noLaunchAgent = args.has("--no-launch-agent");
 const assetsSource = path.join(skillRoot, "assets", "panel");
 const assetsTarget = path.join(installRoot, "assets");
 const scriptsTarget = path.join(installRoot, "scripts");
+const configPath = path.join(installRoot, "config.json");
 const profileOverridePath = path.join(installRoot, "profile.json");
 const syncSource = path.join(skillRoot, "scripts", "sync-usage.mjs");
 const syncTarget = path.join(scriptsTarget, "sync-usage.mjs");
@@ -131,6 +182,25 @@ const pythonBinary = "/usr/bin/python3";
 const launchAgentsDir = path.join(homedir(), "Library", "LaunchAgents");
 const serverPlist = path.join(launchAgentsDir, `${serverLabel}.plist`);
 const syncPlist = path.join(launchAgentsDir, `${syncLabel}.plist`);
+const previousConfig = readJsonFile(configPath) || {};
+
+if (process.platform === "darwin" && !noLaunchAgent) {
+  mkdirSync(launchAgentsDir, { recursive: true });
+  bootoutPlist(serverPlist);
+  bootoutPlist(syncPlist);
+  if (!args.has("--keep-legacy-launch-agents")) disableLegacyLaunchAgents(launchAgentsDir);
+}
+
+const requestedPortArg = args.get("--port");
+const port = await resolvePort(parsePort(requestedPortArg || defaultPort, "--port"), !requestedPortArg);
+const aliasPorts = new Set([
+  ...parsePortList(args.get("--alias-port"), "--alias-port"),
+  ...parsePortList(args.get("--alias-ports"), "--alias-ports")
+]);
+if (previousConfig.port && Number(previousConfig.port) !== port) {
+  aliasPorts.add(parsePort(previousConfig.port, "previous config port"));
+}
+aliasPorts.delete(port);
 
 if (!existsSync(assetsSource)) {
   throw new Error(`Missing dashboard assets: ${assetsSource}`);
@@ -144,7 +214,7 @@ copyFileSync(syncSource, syncTarget);
 chmodSync(syncTarget, 0o755);
 
 writeFileSync(
-  path.join(installRoot, "config.json"),
+  configPath,
   `${JSON.stringify({ port, intervalMs, codexBinary }, null, 2)}\n`
 );
 
@@ -167,20 +237,19 @@ if (Object.keys(profileOverride).length > 0) {
   writeFileSync(profileOverridePath, `${JSON.stringify(profileOverride, null, 2)}\n`);
 }
 
-if (process.platform === "darwin" && !noLaunchAgent) {
-  mkdirSync(launchAgentsDir, { recursive: true });
-  const serverPayload = `<?xml version="1.0" encoding="UTF-8"?>
+function serverLaunchAgentPayload(label, servePort, stdoutPath, stderrPath) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>${xml(serverLabel)}</string>
+  <string>${xml(label)}</string>
   <key>ProgramArguments</key>
   <array>
     <string>${xml(pythonBinary)}</string>
     <string>-m</string>
     <string>http.server</string>
-    <string>${xml(port)}</string>
+    <string>${xml(servePort)}</string>
     <string>--bind</string>
     <string>127.0.0.1</string>
     <string>--directory</string>
@@ -193,14 +262,28 @@ if (process.platform === "darwin" && !noLaunchAgent) {
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>/tmp/codex-usage-panel-server.log</string>
+  <string>${xml(stdoutPath)}</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/codex-usage-panel-server.err.log</string>
+  <string>${xml(stderrPath)}</string>
   <key>ProcessType</key>
   <string>Background</string>
 </dict>
 </plist>
 `;
+}
+
+function aliasLabel(aliasPort) {
+  return `${serverLabel}.alias-${aliasPort}`;
+}
+
+if (process.platform === "darwin" && !noLaunchAgent) {
+  mkdirSync(launchAgentsDir, { recursive: true });
+  const serverPayload = serverLaunchAgentPayload(
+    serverLabel,
+    port,
+    "/tmp/codex-usage-panel-server.log",
+    "/tmp/codex-usage-panel-server.err.log"
+  );
 
   const syncPayload = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -245,6 +328,24 @@ if (process.platform === "darwin" && !noLaunchAgent) {
   writePlist(syncPlist, syncPayload);
   launchAgent(serverLabel, serverPlist);
   launchAgent(syncLabel, syncPlist);
+
+  for (const aliasPort of aliasPorts) {
+    const label = aliasLabel(aliasPort);
+    const aliasPlist = path.join(launchAgentsDir, `${label}.plist`);
+    const aliasPayload = serverLaunchAgentPayload(
+      label,
+      aliasPort,
+      `/tmp/codex-usage-panel-alias-${aliasPort}.log`,
+      `/tmp/codex-usage-panel-alias-${aliasPort}.err.log`
+    );
+    writePlist(aliasPlist, aliasPayload);
+    try {
+      launchAgent(label, aliasPlist);
+      console.log(`Dashboard alias: http://127.0.0.1:${aliasPort}/index.html`);
+    } catch (error) {
+      console.warn(`Could not start alias port ${aliasPort}: ${error.message}`);
+    }
+  }
 } else if (!noLaunchAgent) {
   console.log("LaunchAgents are only configured automatically on macOS.");
 }

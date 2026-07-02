@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5 - 2026-07-02
+
+- Stop existing panel LaunchAgents before selecting a port, avoiding accidental fallback to a new port during reinstall
+- Keep the previous dashboard port as a macOS compatibility alias when the active port changes
+- Added `--alias-port` / `--alias-ports` for explicit old-link compatibility
+- Disable early prototype `com.lukeji.codex-usage-panel-*` LaunchAgents during install, with `--keep-legacy-launch-agents` as an escape hatch
+
 ## 0.1.4 - 2026-07-02
 
 - Let `--profile-avatar` accept local image files and copy them into the installed panel assets

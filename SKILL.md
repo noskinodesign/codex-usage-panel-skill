@@ -45,6 +45,12 @@ Use a custom port when `8765` is already taken:
 node <skill-dir>/scripts/install-panel.mjs --port 8876 --open
 ```
 
+Keep an old dashboard link working after changing ports:
+
+```bash
+node <skill-dir>/scripts/install-panel.mjs --port 8765 --alias-port 8766 --open
+```
+
 Set the displayed profile during install:
 
 ```bash
@@ -68,6 +74,8 @@ Save it as `~/.codex-usage-panel/profile.json`, then run one manual sync.
 
 If no custom port is provided and `8765` is busy, the installer automatically chooses the next
 available local port near `8765` and prints the final dashboard URL.
+On macOS, when a previous install used a different port, the installer keeps that old port as a
+compatibility alias so old Codex conversation links still open the current panel.
 
 Run one manual sync after install:
 
@@ -101,4 +109,5 @@ launchctl print gui/$(id -u)/com.codex.usage-panel.sync
 - If `http://127.0.0.1:8765/index.html` is unreachable, rerun the installer.
 - If Codex usage values do not update, inspect `/tmp/codex-usage-panel-sync.err.log` and confirm `/Applications/Codex.app/Contents/Resources/codex` exists.
 - Codex currently exposes account email and plan to the local app-server, but not the ChatGPT avatar or display nickname. The sync script derives a local profile from the account email and supports `~/.codex-usage-panel/profile.json` for exact name/avatar overrides.
+- The installer disables legacy `com.lukeji.codex-usage-panel-*` LaunchAgents from the early plugin prototype unless `--keep-legacy-launch-agents` is passed.
 - The dashboard is a local browser panel. Codex does not currently support injecting this HTML into every conversation body automatically; the auto-open hook opens the panel URL on session start instead.

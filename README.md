@@ -52,6 +52,14 @@ The panel can be managed through conversation. Just tell Codex:
 If port `8765` is busy, the installer automatically chooses a nearby available
 port and prints the final dashboard URL.
 
+On macOS, the installer now avoids accidental port drift by stopping its own old
+service before selecting a port. If a previous install used another port, it also
+keeps that old URL alive as a compatibility alias. You can add one explicitly:
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --port 8765 --alias-port 8766 --open
+```
+
 ## Auto-Open in New Conversations
 
 Codex does not currently have a built-in setting that pins a custom HTML panel
@@ -183,6 +191,10 @@ That's it. No external account, cloud backend, or usage API key required.
 2. A local server serves the HTML panel on `127.0.0.1`
 3. A sync process reads Codex desktop app-server usage and local account metadata every 10 seconds
 4. The panel reloads the local `usage-data.js` file and updates itself
+
+When upgrading on macOS, the installer also disables the early prototype
+`com.lukeji.codex-usage-panel-*` LaunchAgents and keeps a previous dashboard
+port alive when it changed, so old links in Codex conversations keep working.
 
 The sync process reads local Codex app-server methods such as
 `account/rateLimits/read`, `account/usage/read`, and `account/read`.

@@ -49,6 +49,12 @@ Agent 会自动：
 
 如果 `8765` 端口被占用，安装器会自动选择附近可用端口，并输出最终访问地址。
 
+在 macOS 上，安装器现在会先停掉自己的旧服务再选择端口，避免误判端口占用导致从 `8765` 漂到 `8766`。如果上一次安装使用过其他端口，也会保留旧地址作为兼容入口。你也可以显式添加：
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --port 8765 --alias-port 8766 --open
+```
+
 ## 新对话自动打开
 
 Codex 目前没有内置设置可以把自定义 HTML 面板固定注入到每一个对话正文里。这个 skill 提供了一个本地 `SessionStart` hook：当 Codex 启动或恢复对话时，自动打开用量面板地址。
@@ -168,6 +174,8 @@ unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 2. 本地服务通过 `127.0.0.1` 提供 HTML 面板
 3. 同步进程每 10 秒读取 Codex 桌面端本地 app-server 用量数据和本地账号信息
 4. 面板重新读取本地 `usage-data.js` 并更新显示
+
+在 macOS 上升级时，安装器也会停用早期原型版的 `com.lukeji.codex-usage-panel-*` LaunchAgents，并在端口发生变化时保留旧端口兼容入口，让旧对话里的链接仍然可用。
 
 同步进程会读取本机 Codex app-server 的 `account/rateLimits/read` 和
 `account/usage/read`、`account/read` 等方法。
