@@ -3,7 +3,9 @@ window.CodexUsageData = {
   "profile": {
     "name": "Codex User",
     "handle": "Local account",
-    "plan": "Pro"
+    "plan": "Pro",
+    "avatarUrl": "./avatar.svg",
+    "source": "sample"
   },
   "summary": [
     { "value": "--", "label": "累计 Token" },

@@ -16,6 +16,7 @@ A local dashboard for Codex with:
 
 - Remaining usage for the current short window and weekly window
 - Progress bars and reset times that match Codex's local usage data
+- Local profile display generated from your Codex account, with optional name/avatar override
 - A 26-week Token activity heatmap
 - Lifetime tokens, peak token day, longest task, and streak stats
 - One-click refresh and a compact collapsed view
@@ -45,6 +46,7 @@ The panel can be managed through conversation. Just tell Codex:
 - "Use port 8876"
 - "Refresh usage data"
 - "Auto-open the panel in new conversations"
+- "Set my panel profile name and avatar"
 - "Package this skill for sharing"
 
 If port `8765` is busy, the installer automatically chooses a nearby available
@@ -88,6 +90,35 @@ Edit the files in `assets/panel/`:
 - `usage-data.js` — sample fallback data, overwritten by sync after install
 
 Changes take effect after reinstalling or reloading the local panel.
+
+### Profile Display
+
+Codex's local app-server currently exposes account email and plan, but not the
+ChatGPT display nickname or avatar URL. The panel uses that local account data
+to generate a personal display name, handle, and initials avatar instead of a
+shared default.
+
+For exact profile details, create `~/.codex-usage-panel/profile.json`:
+
+```json
+{
+  "name": "Luke_Ji",
+  "handle": "@jasondongsheng",
+  "avatarUrl": "https://example.com/avatar.png"
+}
+```
+
+Then run:
+
+```bash
+node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
+```
+
+You can also set it during install:
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
+```
 
 ## Default Views
 
@@ -149,11 +180,11 @@ That's it. No external account, cloud backend, or usage API key required.
 
 1. The installer copies the dashboard to `~/.codex-usage-panel`
 2. A local server serves the HTML panel on `127.0.0.1`
-3. A sync process reads Codex desktop app-server usage data every 10 seconds
+3. A sync process reads Codex desktop app-server usage and local account metadata every 10 seconds
 4. The panel reloads the local `usage-data.js` file and updates itself
 
 The sync process reads local Codex app-server methods such as
-`account/rateLimits/read` and `account/usage/read`.
+`account/rateLimits/read`, `account/usage/read`, and `account/read`.
 
 ## Privacy
 
@@ -161,6 +192,7 @@ The sync process reads local Codex app-server methods such as
 - No external analytics
 - No usage data is uploaded by this project
 - No account credentials are stored by this project
+- Profile overrides stay local in `~/.codex-usage-panel/profile.json`
 - Usage data stays on your machine in `~/.codex-usage-panel`
 
 ## Limitations

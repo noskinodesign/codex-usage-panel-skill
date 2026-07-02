@@ -5,6 +5,7 @@
   const monthRow = document.querySelector("#monthRow");
   const quotaList = document.querySelector("#quotaList");
   const updatedAt = document.querySelector("#updatedAt");
+  const profileAvatar = document.querySelector(".mini-avatar");
   const profileName = document.querySelector("#profileName");
   const profileMeta = document.querySelector("#profileMeta");
   const refreshButton = document.querySelector("[data-action='refresh']");
@@ -51,6 +52,15 @@
   function renderProfile() {
     const profile = data.profile || {};
     if (profileName) profileName.textContent = profile.name || "Codex User";
+    if (profileAvatar) {
+      const avatarUrl = profile.avatarUrl || profile.avatar || "./avatar.svg";
+      profileAvatar.alt = profile.name ? `${profile.name} avatar` : "";
+      profileAvatar.onerror = () => {
+        profileAvatar.onerror = null;
+        profileAvatar.src = "./avatar.svg";
+      };
+      if (profileAvatar.getAttribute("src") !== avatarUrl) profileAvatar.src = avatarUrl;
+    }
     if (profileMeta) {
       const meta = [profile.handle || "Local account", profile.plan || "Pro"].filter(Boolean);
       profileMeta.textContent = meta.join(" · ");

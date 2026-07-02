@@ -30,6 +30,7 @@ const watch = args.has("--watch");
 const intervalMs = Number(args.get("--interval") || defaultIntervalMs);
 const installRoot = path.resolve(String(args.get("--root") || process.env.CODEX_USAGE_PANEL_ROOT || defaultRoot).replace(/^~(?=$|\/)/, homedir()));
 const sourceDataPath = path.join(installRoot, "assets", "usage-data.js");
+const profileOverridePath = path.join(installRoot, "profile.json");
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -41,6 +42,129 @@ function readPreviousData() {
   vm.createContext(context);
   vm.runInContext(readFileSync(sourceDataPath, "utf8"), context, { timeout: 1000 });
   return context.window.CodexUsageData || {};
+}
+
+function readJsonFile(filePath) {
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, "utf8"));
+  } catch (error) {
+    console.error(`Could not read ${filePath}: ${error.message}`);
+    return null;
+  }
+}
+
+function cleanString(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function formatPlan(value) {
+  const plan = cleanString(value);
+  if (!plan) return null;
+  return plan[0].toUpperCase() + plan.slice(1);
+}
+
+function emailLocalPart(email) {
+  const cleanEmail = cleanString(email);
+  if (!cleanEmail || !cleanEmail.includes("@")) return null;
+  return cleanEmail.split("@")[0].split("+")[0];
+}
+
+function displayNameFromEmail(email) {
+  const localPart = emailLocalPart(email);
+  if (!localPart) return null;
+  if (!/[._-]/.test(localPart)) return localPart;
+  return localPart
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function handleFromEmail(email) {
+  const localPart = emailLocalPart(email);
+  return localPart ? `@${localPart}` : null;
+}
+
+function profileOverride() {
+  const raw = readJsonFile(profileOverridePath);
+  if (!raw || typeof raw !== "object") return {};
+  return {
+    name: cleanString(raw.name),
+    handle: cleanString(raw.handle),
+    plan: formatPlan(raw.plan),
+    avatarUrl: cleanString(raw.avatarUrl || raw.avatar_url || raw.avatar || raw.imageUrl || raw.picture)
+  };
+}
+
+function isDefaultProfileValue(value, defaults) {
+  const cleanValue = cleanString(value);
+  return !cleanValue || defaults.includes(cleanValue);
+}
+
+function firstUsablePrevious(previous, key, defaults) {
+  const value = previous.profile?.[key];
+  return isDefaultProfileValue(value, defaults) ? null : cleanString(value);
+}
+
+function initialsFromProfile(profile) {
+  const base = cleanString(profile.name) || cleanString(profile.handle)?.replace(/^@/, "") || "CU";
+  const parts = base
+    .replace(/[^\p{L}\p{N}\s._-]/gu, " ")
+    .split(/[\s._-]+/)
+    .filter(Boolean);
+  const initials = parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : base.slice(0, 2);
+  return initials.toUpperCase();
+}
+
+function colorFromSeed(seed) {
+  const palette = [
+    ["#2f80ed", "#d7ebff"],
+    ["#1d8a70", "#daf3ea"],
+    ["#a56510", "#f7e2c1"],
+    ["#6b5dd3", "#e6e1ff"],
+    ["#c2415d", "#f8dbe3"]
+  ];
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return palette[hash % palette.length];
+}
+
+function generatedAvatarUrl(profile) {
+  const initials = initialsFromProfile(profile);
+  const [ink, background] = colorFromSeed(`${profile.name || ""}${profile.handle || ""}`);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="${background}"/><text x="48" y="56" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="700" fill="${ink}">${initials}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function buildProfile(previous, codexLimit, accountResponse) {
+  const override = profileOverride();
+  const account = accountResponse?.account || {};
+  const previousAvatar = firstUsablePrevious(previous, "avatarUrl", ["", "./avatar.svg"]) || firstUsablePrevious(previous, "avatar", ["", "./avatar.svg"]);
+
+  const profile = {
+    name:
+      override.name ||
+      firstUsablePrevious(previous, "name", ["Codex User"]) ||
+      displayNameFromEmail(account.email) ||
+      "Codex User",
+    handle:
+      override.handle ||
+      firstUsablePrevious(previous, "handle", ["Local account"]) ||
+      handleFromEmail(account.email) ||
+      "Local account",
+    plan:
+      override.plan ||
+      formatPlan(codexLimit.planType) ||
+      formatPlan(account.planType) ||
+      firstUsablePrevious(previous, "plan", []) ||
+      "Pro",
+    avatarUrl: override.avatarUrl || previousAvatar || ""
+  };
+
+  if (!profile.avatarUrl) profile.avatarUrl = generatedAvatarUrl(profile);
+  profile.source = override.name || override.handle || override.avatarUrl ? "profile-json" : account.email ? "codex-account" : "fallback";
+  return profile;
 }
 
 function formatCompactNumber(value) {
@@ -143,7 +267,7 @@ function quotaFromWindow(window, tone) {
   };
 }
 
-function buildUsageData(rateLimitResponse, usageResponse) {
+function buildUsageData(rateLimitResponse, usageResponse, accountResponse) {
   const previous = readPreviousData();
   const codexLimit =
     rateLimitResponse?.rateLimitsByLimitId?.codex ||
@@ -173,11 +297,7 @@ function buildUsageData(rateLimitResponse, usageResponse) {
       syncMode: watch ? "watch" : "once",
       pollIntervalMs: watch ? intervalMs : null
     },
-    profile: {
-      name: previous.profile?.name || "Codex User",
-      handle: previous.profile?.handle || "Local account",
-      plan: codexLimit.planType ? codexLimit.planType[0].toUpperCase() + codexLimit.planType.slice(1) : previous.profile?.plan || "Pro"
-    },
+    profile: buildProfile(previous, codexLimit, accountResponse),
     summary: [
       { value: formatCompactNumber(summary.lifetimeTokens), label: "累计 Token" },
       { value: formatCompactNumber(summary.peakDailyTokens), label: "峰值 Token" },
@@ -256,6 +376,14 @@ class CodexAppServerClient {
     });
   }
 
+  async optionalRequest(method, params) {
+    try {
+      return await this.request(method, params);
+    } catch (_) {
+      return null;
+    }
+  }
+
   notify(method, params) {
     const payload = params === undefined ? { method } : { method, params };
     this.child.stdin.write(`${JSON.stringify(payload)}\n`);
@@ -281,11 +409,12 @@ class CodexAppServerClient {
   }
 
   async readUsage() {
-    const [rateLimits, usage] = await Promise.all([
+    const [rateLimits, usage, account] = await Promise.all([
       this.request("account/rateLimits/read"),
-      this.request("account/usage/read")
+      this.request("account/usage/read"),
+      this.optionalRequest("account/read", {})
     ]);
-    return { rateLimits, usage };
+    return { rateLimits, usage, account };
   }
 
   close() {
@@ -296,8 +425,8 @@ class CodexAppServerClient {
 }
 
 async function syncOnce(client) {
-  const { rateLimits, usage } = await client.readUsage();
-  const data = buildUsageData(rateLimits, usage);
+  const { rateLimits, usage, account } = await client.readUsage();
+  const data = buildUsageData(rateLimits, usage, account);
   writeUsageData(data);
   return data;
 }

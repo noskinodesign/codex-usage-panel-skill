@@ -14,6 +14,7 @@
 
 - 当前短窗口和每周窗口的剩余用量
 - 与 Codex 本地用量数据同步的进度条和重置时间
+- 从 Codex 本地账号生成的个人资料展示，并支持自定义昵称/头像
 - 26 周 Token 活动热力图
 - 累计 Token、峰值 Token、最长任务和连续使用天数
 - 一键刷新和折叠视图
@@ -43,6 +44,7 @@ Agent 会自动：
 - "Use port 8876"
 - "Refresh usage data"
 - "Auto-open the panel in new conversations"
+- "Set my panel profile name and avatar"
 - "Package this skill for sharing"
 
 如果 `8765` 端口被占用，安装器会自动选择附近可用端口，并输出最终访问地址。
@@ -80,6 +82,32 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remo
 - `usage-data.js` — 示例兜底数据，安装后会被同步进程覆盖
 
 重新安装或刷新本地面板后即可看到变化。
+
+### 个人资料显示
+
+Codex 本地 app-server 目前会暴露账号邮箱和套餐，但不会暴露 ChatGPT 的显示昵称或头像 URL。面板会用本地账号信息生成个人化的名称、handle 和首字母头像，避免所有用户都显示同一个默认身份。
+
+如果你想精确显示昵称和头像，可以创建 `~/.codex-usage-panel/profile.json`：
+
+```json
+{
+  "name": "Luke_Ji",
+  "handle": "@jasondongsheng",
+  "avatarUrl": "https://example.com/avatar.png"
+}
+```
+
+然后运行一次同步：
+
+```bash
+node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
+```
+
+也可以在安装时直接设置：
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
+```
 
 ## 默认视图
 
@@ -138,11 +166,11 @@ unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 
 1. 安装器把面板复制到 `~/.codex-usage-panel`
 2. 本地服务通过 `127.0.0.1` 提供 HTML 面板
-3. 同步进程每 10 秒读取 Codex 桌面端本地 app-server 用量数据
+3. 同步进程每 10 秒读取 Codex 桌面端本地 app-server 用量数据和本地账号信息
 4. 面板重新读取本地 `usage-data.js` 并更新显示
 
 同步进程会读取本机 Codex app-server 的 `account/rateLimits/read` 和
-`account/usage/read` 等方法。
+`account/usage/read`、`account/read` 等方法。
 
 ## 隐私
 
@@ -150,6 +178,7 @@ unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 - 没有外部分析
 - 本项目不会上传用量数据
 - 本项目不会保存账号凭据
+- 自定义个人资料只保存在本机 `~/.codex-usage-panel/profile.json`
 - 用量数据保留在你的本机 `~/.codex-usage-panel`
 
 ## 限制

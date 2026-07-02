@@ -122,6 +122,7 @@ const noLaunchAgent = args.has("--no-launch-agent");
 const assetsSource = path.join(skillRoot, "assets", "panel");
 const assetsTarget = path.join(installRoot, "assets");
 const scriptsTarget = path.join(installRoot, "scripts");
+const profileOverridePath = path.join(installRoot, "profile.json");
 const syncSource = path.join(skillRoot, "scripts", "sync-usage.mjs");
 const syncTarget = path.join(scriptsTarget, "sync-usage.mjs");
 const codexBinary = process.env.CODEX_APP_BINARY || "/Applications/Codex.app/Contents/Resources/codex";
@@ -146,6 +147,14 @@ writeFileSync(
   path.join(installRoot, "config.json"),
   `${JSON.stringify({ port, intervalMs, codexBinary }, null, 2)}\n`
 );
+
+const profileOverride = {};
+if (args.has("--profile-name")) profileOverride.name = args.get("--profile-name");
+if (args.has("--profile-handle")) profileOverride.handle = args.get("--profile-handle");
+if (args.has("--profile-avatar")) profileOverride.avatarUrl = args.get("--profile-avatar");
+if (Object.keys(profileOverride).length > 0) {
+  writeFileSync(profileOverridePath, `${JSON.stringify(profileOverride, null, 2)}\n`);
+}
 
 if (process.platform === "darwin" && !noLaunchAgent) {
   mkdirSync(launchAgentsDir, { recursive: true });

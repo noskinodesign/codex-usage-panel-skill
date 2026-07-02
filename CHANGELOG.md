@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-07-02
+
+- Added local Codex account metadata sync through `account/read`
+- Derived a personalized display name, handle, and initials avatar when ChatGPT nickname/avatar are not exposed locally
+- Added `~/.codex-usage-panel/profile.json` and installer flags for exact profile name, handle, and avatar overrides
+- Updated the panel renderer to use synced `profile.avatarUrl`
+
 ## 0.1.1 - 2026-07-02
 
 - Added optional Codex `SessionStart` hook installer for auto-opening the usage panel in new or resumed conversations

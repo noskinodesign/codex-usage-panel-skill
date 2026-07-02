@@ -20,7 +20,7 @@ about every 10 seconds.
 ## What This Skill Provides
 
 - A compact local dashboard with profile, remaining usage progress bars, Token activity, and summary stats.
-- A sync script that reads Codex desktop app-server methods `account/rateLimits/read` and `account/usage/read`.
+- A sync script that reads Codex desktop app-server methods `account/rateLimits/read`, `account/usage/read`, and local account metadata when available.
 - macOS LaunchAgents for a persistent local web server and a persistent usage sync process.
 - An optional SessionStart hook installer that opens the panel when Codex starts or resumes a conversation.
 - A shareable Skill folder: zip the whole `codex-usage-panel` directory and have another user unzip it into `~/.codex/skills/`.
@@ -44,6 +44,24 @@ Use a custom port when `8765` is already taken:
 ```bash
 node <skill-dir>/scripts/install-panel.mjs --port 8876 --open
 ```
+
+Set the displayed profile during install:
+
+```bash
+node <skill-dir>/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
+```
+
+Or edit the installed local profile override:
+
+```json
+{
+  "name": "Luke_Ji",
+  "handle": "@jasondongsheng",
+  "avatarUrl": "https://example.com/avatar.png"
+}
+```
+
+Save it as `~/.codex-usage-panel/profile.json`, then run one manual sync.
 
 If no custom port is provided and `8765` is busy, the installer automatically chooses the next
 available local port near `8765` and prints the final dashboard URL.
@@ -79,4 +97,5 @@ launchctl print gui/$(id -u)/com.codex.usage-panel.sync
 - Prefer `scripts/install-auto-open-hook.mjs` instead of hand-editing `~/.codex/hooks.json`.
 - If `http://127.0.0.1:8765/index.html` is unreachable, rerun the installer.
 - If Codex usage values do not update, inspect `/tmp/codex-usage-panel-sync.err.log` and confirm `/Applications/Codex.app/Contents/Resources/codex` exists.
+- Codex currently exposes account email and plan to the local app-server, but not the ChatGPT avatar or display nickname. The sync script derives a local profile from the account email and supports `~/.codex-usage-panel/profile.json` for exact name/avatar overrides.
 - The dashboard is a local browser panel. Codex does not currently support injecting this HTML into every conversation body automatically; the auto-open hook opens the panel URL on session start instead.
