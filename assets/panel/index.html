@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex 用量面板</title>
+    <link rel="stylesheet" href="./panel.css?v=skill-shareable-20260630" />
+  </head>
+  <body>
+    <main class="usage-panel" aria-live="polite">
+      <header class="panel-topbar">
+        <div class="identity-chip">
+          <img class="mini-avatar" src="./avatar.svg" alt="" />
+          <div>
+            <h1 id="profileName">Codex User</h1>
+            <p class="eyebrow" id="profileMeta">Local account · Pro</p>
+          </div>
+        </div>
+
+        <div class="topbar-controls">
+          <button class="icon-button refresh-button" type="button" data-action="refresh" aria-label="刷新数据" title="刷新数据">
+            <span aria-hidden="true">↻</span>
+          </button>
+          <button class="icon-button" type="button" data-action="toggle" aria-label="折叠面板" title="折叠面板">
+            <span class="collapse-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <button class="collapsed-summary" type="button" data-action="toggle" aria-label="展开面板" title="展开面板">
+        <span>-- Token</span>
+        <span>-- 连续</span>
+        <span>5小时 --%</span>
+      </button>
+
+      <section class="panel-body">
+        <section class="dashboard-grid">
+          <aside class="quota-area" aria-label="剩余用量">
+            <div class="section-head compact">
+              <h2>剩余用量</h2>
+              <span class="updated-at" id="updatedAt"></span>
+            </div>
+            <div class="quota-list" id="quotaList"></div>
+          </aside>
+
+          <section class="activity-area" aria-label="Token 活动">
+            <div class="section-head">
+              <h2>Token 活动</h2>
+              <div class="segmented activity-tabs" role="tablist" aria-label="活动周期">
+                <button class="segment is-active" type="button" data-mode="daily">每日</button>
+                <button class="segment" type="button" data-mode="weekly">每周</button>
+                <button class="segment" type="button" data-mode="total">累计</button>
+              </div>
+            </div>
+
+            <div class="heatmap-wrap">
+              <div class="heatmap" id="heatmap" aria-label="Token 活动热力图"></div>
+              <div class="month-row" id="monthRow" aria-hidden="true"></div>
+            </div>
+          </section>
+
+          <section class="stats-area" aria-label="Token 概览" id="statsArea"></section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./usage-data.js?v=skill-shareable-20260630"></script>
+    <script src="./panel.js?v=skill-shareable-20260630"></script>
+  </body>
+</html>

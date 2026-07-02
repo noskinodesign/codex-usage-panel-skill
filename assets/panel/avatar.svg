@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88" viewBox="0 0 88 88" role="img" aria-label="Codex usage panel avatar">
+  <defs>
+    <linearGradient id="g" x1="18" y1="12" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2F80ED"/>
+      <stop offset="1" stop-color="#1D8A70"/>
+    </linearGradient>
+  </defs>
+  <rect width="88" height="88" rx="44" fill="#F1F5F9"/>
+  <path d="M44 16c15.5 0 28 12.5 28 28S59.5 72 44 72 16 59.5 16 44s12.5-28 28-28Z" fill="url(#g)"/>
+  <path d="M44 28c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16Zm0 8a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z" fill="white"/>
+  <path d="M44 20v10M44 58v10M20 44h10M58 44h10" stroke="white" stroke-width="5" stroke-linecap="round" opacity=".82"/>
+</svg>
