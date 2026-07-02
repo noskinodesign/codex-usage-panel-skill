@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 - 2026-07-02
+
+- Let `--profile-avatar` accept local image files and copy them into the installed panel assets
+- Documented local avatar file setup for exact profile display
+
 ## 0.1.3 - 2026-07-02
 
 - Bumped dashboard asset cache keys so upgraded installs load the latest profile renderer immediately

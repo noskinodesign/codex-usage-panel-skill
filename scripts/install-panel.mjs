@@ -151,7 +151,18 @@ writeFileSync(
 const profileOverride = {};
 if (args.has("--profile-name")) profileOverride.name = args.get("--profile-name");
 if (args.has("--profile-handle")) profileOverride.handle = args.get("--profile-handle");
-if (args.has("--profile-avatar")) profileOverride.avatarUrl = args.get("--profile-avatar");
+if (args.has("--profile-avatar")) {
+  const avatarInput = String(args.get("--profile-avatar"));
+  const avatarFile = path.resolve(expandHome(avatarInput));
+  if (existsSync(avatarFile) && statSync(avatarFile).isFile()) {
+    const extension = path.extname(avatarFile).toLowerCase() || ".png";
+    const avatarTargetName = `profile-avatar${extension}`;
+    copyFileSync(avatarFile, path.join(assetsTarget, avatarTargetName));
+    profileOverride.avatarUrl = `./${avatarTargetName}`;
+  } else {
+    profileOverride.avatarUrl = avatarInput;
+  }
+}
 if (Object.keys(profileOverride).length > 0) {
   writeFileSync(profileOverridePath, `${JSON.stringify(profileOverride, null, 2)}\n`);
 }

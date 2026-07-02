@@ -114,10 +114,11 @@ Then run:
 node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
 ```
 
-You can also set it during install:
+You can also set it during install. `--profile-avatar` accepts either an image
+URL or a local image path:
 
 ```bash
-node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar ~/Pictures/avatar.png --open
 ```
 
 ## Default Views

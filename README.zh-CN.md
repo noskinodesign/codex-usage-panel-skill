@@ -103,10 +103,10 @@ Codex 本地 app-server 目前会暴露账号邮箱和套餐，但不会暴露 C
 node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
 ```
 
-也可以在安装时直接设置：
+也可以在安装时直接设置。`--profile-avatar` 可以是图片 URL，也可以是本地图片路径：
 
 ```bash
-node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar ~/Pictures/avatar.png --open
 ```
 
 ## 默认视图

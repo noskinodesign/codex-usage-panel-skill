@@ -51,6 +51,9 @@ Set the displayed profile during install:
 node <skill-dir>/scripts/install-panel.mjs --profile-name "Luke_Ji" --profile-handle "@jasondongsheng" --profile-avatar "https://example.com/avatar.png" --open
 ```
 
+`--profile-avatar` can be an `https://` image URL or a local image path. Local files are copied
+into the installed panel assets folder and served from `127.0.0.1`.
+
 Or edit the installed local profile override:
 
 ```json
