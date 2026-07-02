@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-07-02
+
+- Added optional Codex `SessionStart` hook installer for auto-opening the usage panel in new or resumed conversations
+- Documented how to enable and remove auto-open behavior
+- Included the auto-open hook installer in the release zip
+
 ## 0.1.0 - 2026-06-30
 
 - Initial shareable Codex Skill release

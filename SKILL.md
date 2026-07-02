@@ -22,6 +22,7 @@ about every 10 seconds.
 - A compact local dashboard with profile, remaining usage progress bars, Token activity, and summary stats.
 - A sync script that reads Codex desktop app-server methods `account/rateLimits/read` and `account/usage/read`.
 - macOS LaunchAgents for a persistent local web server and a persistent usage sync process.
+- An optional SessionStart hook installer that opens the panel when Codex starts or resumes a conversation.
 - A shareable Skill folder: zip the whole `codex-usage-panel` directory and have another user unzip it into `~/.codex/skills/`.
 
 ## Common Tasks
@@ -53,6 +54,18 @@ Run one manual sync after install:
 node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
 ```
 
+Enable auto-open in new Codex conversations:
+
+```bash
+node <skill-dir>/scripts/install-auto-open-hook.mjs
+```
+
+Remove auto-open:
+
+```bash
+node <skill-dir>/scripts/install-auto-open-hook.mjs --remove
+```
+
 Check service health on macOS:
 
 ```bash
@@ -63,6 +76,7 @@ launchctl print gui/$(id -u)/com.codex.usage-panel.sync
 ## Notes For Agents
 
 - Prefer the installer instead of hand-editing LaunchAgents.
+- Prefer `scripts/install-auto-open-hook.mjs` instead of hand-editing `~/.codex/hooks.json`.
 - If `http://127.0.0.1:8765/index.html` is unreachable, rerun the installer.
 - If Codex usage values do not update, inspect `/tmp/codex-usage-panel-sync.err.log` and confirm `/Applications/Codex.app/Contents/Resources/codex` exists.
-- The dashboard is a local browser panel. Codex does not currently support injecting this HTML into every conversation body automatically.
+- The dashboard is a local browser panel. Codex does not currently support injecting this HTML into every conversation body automatically; the auto-open hook opens the panel URL on session start instead.

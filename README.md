@@ -19,6 +19,7 @@ A local dashboard for Codex with:
 - A 26-week Token activity heatmap
 - Lifetime tokens, peak token day, longest task, and streak stats
 - One-click refresh and a compact collapsed view
+- Optional auto-open hook for new Codex conversations
 - English and Chinese docs
 
 ## Quick Start
@@ -43,10 +44,33 @@ The panel can be managed through conversation. Just tell Codex:
 - "Repair the usage panel"
 - "Use port 8876"
 - "Refresh usage data"
+- "Auto-open the panel in new conversations"
 - "Package this skill for sharing"
 
 If port `8765` is busy, the installer automatically chooses a nearby available
 port and prints the final dashboard URL.
+
+## Auto-Open in New Conversations
+
+Codex does not currently have a built-in setting that pins a custom HTML panel
+inside every conversation. This skill includes a local `SessionStart` hook that
+gets you close: when Codex starts or resumes a conversation, the hook opens the
+usage panel URL in Codex.
+
+Enable it:
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs
+```
+
+Remove it:
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
+```
+
+The first time the hook runs, Codex may ask you to review and trust it. The hook
+only opens `http://127.0.0.1:8765/index.html`.
 
 ## Customizing the Panel
 
@@ -143,7 +167,8 @@ The sync process reads local Codex app-server methods such as
 
 Codex does not currently support injecting a custom HTML panel into every
 conversation body. The recommended setup is to keep the panel open in the Codex
-side browser or in a small browser window.
+side browser, use the included auto-open hook, or keep it in a small browser
+window.
 
 ## License
 

@@ -16,6 +16,7 @@ const required = [
   "SKILL.md",
   "agents",
   "assets",
+  "scripts/install-auto-open-hook.mjs",
   "scripts/install-panel.mjs",
   "scripts/sync-usage.mjs"
 ];
@@ -37,7 +38,7 @@ for (const entry of ["SKILL.md", "README.md", "README.zh-CN.md", "LICENSE", "age
   }
 }
 
-for (const script of ["install-panel.mjs", "sync-usage.mjs"]) {
+for (const script of ["install-panel.mjs", "install-auto-open-hook.mjs", "sync-usage.mjs"]) {
   cpSync(path.join(repoRoot, "scripts", script), path.join(stagingSkill, "scripts", script));
 }
 

@@ -17,6 +17,7 @@
 - 26 周 Token 活动热力图
 - 累计 Token、峰值 Token、最长任务和连续使用天数
 - 一键刷新和折叠视图
+- 可选的新对话自动打开 hook
 - 英文和中文文档
 
 ## 快速开始
@@ -41,9 +42,28 @@ Agent 会自动：
 - "Repair the usage panel"
 - "Use port 8876"
 - "Refresh usage data"
+- "Auto-open the panel in new conversations"
 - "Package this skill for sharing"
 
 如果 `8765` 端口被占用，安装器会自动选择附近可用端口，并输出最终访问地址。
+
+## 新对话自动打开
+
+Codex 目前没有内置设置可以把自定义 HTML 面板固定注入到每一个对话正文里。这个 skill 提供了一个本地 `SessionStart` hook：当 Codex 启动或恢复对话时，自动打开用量面板地址。
+
+开启：
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs
+```
+
+移除：
+
+```bash
+node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
+```
+
+第一次运行 hook 时，Codex 可能会要求你 review 并信任它。这个 hook 只会打开 `http://127.0.0.1:8765/index.html`。
 
 ## 自定义面板
 
@@ -134,7 +154,7 @@ unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 
 ## 限制
 
-Codex 目前不支持把自定义 HTML 面板自动注入到每一个对话正文里。推荐方式是把面板固定在 Codex 右侧浏览器，或者用一个小浏览器窗口常驻显示。
+Codex 目前不支持把自定义 HTML 面板自动注入到每一个对话正文里。推荐方式是把面板固定在 Codex 右侧浏览器、使用内置的自动打开 hook，或者用一个小浏览器窗口常驻显示。
 
 ## 许可证
 
