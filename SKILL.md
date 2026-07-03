@@ -76,6 +76,8 @@ If no custom port is provided and `8765` is busy, the installer automatically ch
 available local port near `8765` and prints the final dashboard URL.
 On macOS, when a previous install used a different port, the installer keeps that old port as a
 compatibility alias so old Codex conversation links still open the current panel.
+When reinstalling, existing `profile.json` stays in place and any local relative avatar asset it
+references, such as `./profile-avatar.png`, is preserved across the asset refresh.
 
 Run one manual sync after install:
 

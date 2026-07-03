@@ -55,6 +55,8 @@ Agent 会自动：
 node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --port 8765 --alias-port 8766 --open
 ```
 
+重新安装时会保留 `~/.codex-usage-panel/profile.json`，并保留其中引用的本地头像文件，例如 `./profile-avatar.png`。
+
 ## 新对话自动打开
 
 Codex 目前没有内置设置可以把自定义 HTML 面板固定注入到每一个对话正文里。这个 skill 提供了一个本地 `SessionStart` hook：当 Codex 启动或恢复对话时，自动打开用量面板地址。

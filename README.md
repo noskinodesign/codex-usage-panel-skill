@@ -60,6 +60,9 @@ keeps that old URL alive as a compatibility alias. You can add one explicitly:
 node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --port 8765 --alias-port 8766 --open
 ```
 
+Reinstalling keeps `~/.codex-usage-panel/profile.json` and preserves local
+avatar files referenced from it, such as `./profile-avatar.png`.
+
 ## Auto-Open in New Conversations
 
 Codex does not currently have a built-in setting that pins a custom HTML panel

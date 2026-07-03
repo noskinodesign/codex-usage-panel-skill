@@ -138,6 +138,36 @@ function disableLegacyLaunchAgents(launchAgentsDir) {
   }
 }
 
+function localAvatarAssetPath(profile) {
+  const avatarUrl = typeof profile?.avatarUrl === "string" ? profile.avatarUrl.trim() : "";
+  if (!avatarUrl || avatarUrl.startsWith("data:") || /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(avatarUrl)) return null;
+  const pathname = avatarUrl.split(/[?#]/)[0].replace(/^\.\/+/, "");
+  if (!pathname || path.isAbsolute(pathname)) return null;
+  const normalized = path.normalize(pathname);
+  if (normalized === "." || normalized.startsWith("..") || normalized.includes(`${path.sep}..${path.sep}`)) return null;
+  return normalized;
+}
+
+function preserveProfileAvatar(profile, assetsTarget, installRoot) {
+  const relativePath = localAvatarAssetPath(profile);
+  if (!relativePath) return null;
+  const sourcePath = path.join(assetsTarget, relativePath);
+  if (!existsSync(sourcePath) || !statSync(sourcePath).isFile()) return null;
+  const preserveDir = path.join(installRoot, ".install-preserve");
+  const preservePath = path.join(preserveDir, `${process.pid}-${path.basename(relativePath)}`);
+  mkdirSync(preserveDir, { recursive: true });
+  copyFileSync(sourcePath, preservePath);
+  return { preservePath, relativePath };
+}
+
+function restoreProfileAvatar(preserved, assetsTarget) {
+  if (!preserved || !existsSync(preserved.preservePath)) return;
+  const targetPath = path.join(assetsTarget, preserved.relativePath);
+  mkdirSync(path.dirname(targetPath), { recursive: true });
+  copyFileSync(preserved.preservePath, targetPath);
+  rmSync(preserved.preservePath, { force: true });
+}
+
 function canBindPort(port) {
   return new Promise((resolve) => {
     const server = createServer();
@@ -183,6 +213,7 @@ const launchAgentsDir = path.join(homedir(), "Library", "LaunchAgents");
 const serverPlist = path.join(launchAgentsDir, `${serverLabel}.plist`);
 const syncPlist = path.join(launchAgentsDir, `${syncLabel}.plist`);
 const previousConfig = readJsonFile(configPath) || {};
+const previousProfileOverride = readJsonFile(profileOverridePath) || {};
 
 if (process.platform === "darwin" && !noLaunchAgent) {
   mkdirSync(launchAgentsDir, { recursive: true });
@@ -208,8 +239,10 @@ if (!existsSync(assetsSource)) {
 
 mkdirSync(installRoot, { recursive: true });
 mkdirSync(scriptsTarget, { recursive: true });
+const preservedProfileAvatar = preserveProfileAvatar(previousProfileOverride, assetsTarget, installRoot);
 rmSync(assetsTarget, { recursive: true, force: true });
 copyDirectory(assetsSource, assetsTarget);
+if (!args.has("--profile-avatar")) restoreProfileAvatar(preservedProfileAvatar, assetsTarget);
 copyFileSync(syncSource, syncTarget);
 chmodSync(syncTarget, 0o755);
 

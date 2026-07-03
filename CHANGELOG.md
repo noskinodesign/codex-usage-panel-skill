@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6 - 2026-07-03
+
+- Preserve local profile avatar assets referenced by `profile.json` during reinstall
+- Prevent `./profile-avatar.png` from being deleted when refreshing dashboard assets
+
 ## 0.1.5 - 2026-07-02
 
 - Stop existing panel LaunchAgents before selecting a port, avoiding accidental fallback to a new port during reinstall
