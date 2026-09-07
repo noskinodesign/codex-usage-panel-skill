@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.7 - 2026-09-07
+
+- Make the auto-open hook follow the installed panel's current port, including automatic port selection and later port changes
+- Support `--root` for auto-open with a custom panel install directory while preserving explicit URL overrides
+- Refresh the project preview with the author's September 2026 dashboard screenshot and clarify that bundled data is generic
+- Add direct release links and upgrade instructions to the English and Chinese README
+- Include the preview image, changelog, and packaging script in the release zip so extracted documentation and repackaging work
+
 ## 0.1.6 - 2026-07-03
 
 - Preserve local profile avatar assets referenced by `profile.json` during reinstall

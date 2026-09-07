@@ -8,7 +8,15 @@ activity, and streaks into a compact dashboard you can keep open while working.
 **Philosophy:** Keep your limits visible, so you can plan the work instead of
 discovering quota surprises in the middle of a long task.
 
-![Codex Usage Panel preview](docs/assets/preview.png)
+[Download the latest release](https://github.com/noskinodesign/codex-usage-panel-skill/releases/latest) · [Installation](#installation) · [Changelog](CHANGELOG.md)
+
+<p align="center">
+  <img src="docs/assets/preview.png" alt="Codex Usage Panel showing remaining usage, reset credits, Token activity, and streaks" width="420">
+</p>
+
+The author's panel, captured in September 2026. The bundled skill starts with
+sample data and switches to your own Codex account and local session activity
+after sync. Available quota windows and reset credits depend on the account.
 
 ## What You Get
 
@@ -82,8 +90,14 @@ Remove it:
 node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
 ```
 
-The first time the hook runs, Codex may ask you to review and trust it. The hook
-only opens `http://127.0.0.1:8765/index.html`.
+The first time the hook runs, Codex may ask you to review and trust it. By default,
+the hook reads the panel's current local port whenever it runs, so it follows
+automatic port selection and later port changes. If no valid configuration exists,
+it falls back to `http://127.0.0.1:8765/index.html`.
+
+For a custom panel install directory, pass `--root /path/to/panel` when enabling
+the hook. Use `--url` to pin a specific dashboard URL, or set
+`CODEX_USAGE_PANEL_URL` to override it at runtime.
 
 ## Customizing the Panel
 
@@ -173,12 +187,26 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --open
 
 ### Release Zip
 
-Download `codex-usage-panel-skill.zip` from GitHub Releases, then:
+Download `codex-usage-panel-skill.zip` from the
+[latest GitHub release](https://github.com/noskinodesign/codex-usage-panel-skill/releases/latest), then:
 
 ```bash
 mkdir -p ~/.codex/skills
 unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 ```
+
+### Update an Existing Installation
+
+For a Git clone, update the skill and run the installer again:
+
+```bash
+git -C ~/.codex/skills/codex-usage-panel pull --ff-only
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs
+```
+
+For a release zip, replace the skill folder with the latest download, then run
+the same installer. If auto-open is enabled, run its installer again to update
+the hook. Reinstalling preserves the panel's local profile and avatar.
 
 ## Requirements
 

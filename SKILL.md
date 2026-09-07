@@ -91,11 +91,31 @@ Enable auto-open in new Codex conversations:
 node <skill-dir>/scripts/install-auto-open-hook.mjs
 ```
 
+The hook reads the installed panel's `config.json` each time it runs, so it follows
+automatic port selection and later port changes. For a custom install directory,
+pass `--root /path/to/panel`. An explicit `--url` pins the dashboard URL, and
+`CODEX_USAGE_PANEL_URL` overrides it at runtime. With no valid panel configuration,
+the default is `http://127.0.0.1:8765/index.html`.
+
+After upgrading the skill, rerun the panel installer. If auto-open is enabled,
+rerun the hook installer too so the installed hook receives updates.
+
 Remove auto-open:
 
 ```bash
 node <skill-dir>/scripts/install-auto-open-hook.mjs --remove
 ```
+
+Build a shareable release zip:
+
+```bash
+node <skill-dir>/scripts/package-skill.mjs
+```
+
+The output is `dist/codex-usage-panel-skill.zip`. It contains the skill, installers,
+documentation, and an author-provided preview screenshot. The bundled panel's
+`usage-data.js` contains generic sample data and is replaced by the user's own
+data after sync.
 
 Check service health on macOS:
 

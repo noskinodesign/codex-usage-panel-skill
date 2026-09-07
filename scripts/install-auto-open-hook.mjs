@@ -17,7 +17,9 @@ for (let index = 2; index < process.argv.length; index += 1) {
 }
 
 const codexHome = path.resolve(String(args.get("--codex-home") || process.env.CODEX_HOME || path.join(homedir(), ".codex")).replace(/^~(?=$|\/)/, homedir()));
-const panelUrl = String(args.get("--url") || "http://127.0.0.1:8765/index.html");
+const panelUrl = args.has("--url") ? String(args.get("--url")) : "";
+const panelRoot = path.resolve(String(args.get("--root") || path.join(homedir(), ".codex-usage-panel")).replace(/^~(?=$|\/)/, homedir()));
+const panelConfigPath = path.join(panelRoot, "config.json");
 const removeHook = args.has("--remove");
 const hooksDir = path.join(codexHome, "hooks");
 const hooksJsonPath = path.join(codexHome, "hooks.json");
@@ -60,10 +62,24 @@ function stripAutoOpenHook(config) {
 
 function writeHookScript() {
   mkdirSync(hooksDir, { recursive: true });
+  const resolvePanelUrl = `const fs = require("node:fs");
+let port = 8765;
+try {
+  const config = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  if (Number.isInteger(config?.port) && config.port >= 1 && config.port <= 65535) port = config.port;
+} catch (_) {}
+process.stdout.write("http://127.0.0.1:" + port + "/index.html");`;
   const payload = `#!/bin/zsh
 set -u
 
-url="\${CODEX_USAGE_PANEL_URL:-${panelUrl}}"
+url="\${CODEX_USAGE_PANEL_URL:-}"
+if [[ -z "$url" ]]; then
+  url=${shellQuote(panelUrl)}
+fi
+if [[ -z "$url" ]]; then
+  url="$(${shellQuote(process.execPath)} -e ${shellQuote(resolvePanelUrl)} ${shellQuote(panelConfigPath)} 2>/dev/null)"
+fi
+url="\${url:-http://127.0.0.1:8765/index.html}"
 stamp_dir="\${HOME}/.codex/tmp"
 stamp_file="\${stamp_dir}/usage-panel-last-opened"
 now="$(/bin/date +%s)"
@@ -119,5 +135,5 @@ writeHooksJson(config);
 console.log(`Installed Codex usage panel auto-open hook.`);
 console.log(`Hook script: ${hookScriptPath}`);
 console.log(`Hooks config: ${hooksJsonPath}`);
-console.log(`Panel URL: ${panelUrl}`);
+console.log(panelUrl ? `Panel URL: ${panelUrl}` : `Panel URL: read from ${panelConfigPath} at session start (default port: 8765)`);
 console.log(`To remove it later: node ${shellQuote(process.argv[1])} --remove`);

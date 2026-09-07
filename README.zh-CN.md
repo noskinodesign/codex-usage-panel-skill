@@ -6,7 +6,13 @@
 
 **理念：** 把限制放在眼前，让你提前规划任务，而不是在长任务中途才发现额度快没了。
 
-![Codex 用量面板预览](docs/assets/preview.png)
+[下载最新版本](https://github.com/noskinodesign/codex-usage-panel-skill/releases/latest) · [安装方法](#安装) · [更新日志](CHANGELOG.md)
+
+<p align="center">
+  <img src="docs/assets/preview.png" alt="Codex 用量面板：剩余用量、可用重置次数、Token 活动和连续使用记录" width="420">
+</p>
+
+上图是作者在 2026 年 9 月的实际面板截图。安装包使用通用示例数据，首次同步后会显示你自己的 Codex 账户用量和本地会话活动；可见额度窗口和重置次数以账号返回的数据为准。
 
 ## 你会得到什么
 
@@ -73,7 +79,9 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs
 node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
 ```
 
-第一次运行 hook 时，Codex 可能会要求你 review 并信任它。这个 hook 只会打开 `http://127.0.0.1:8765/index.html`。
+第一次运行 hook 时，Codex 可能会要求你 review 并信任它。默认情况下，hook 每次运行都会读取面板当前的本地端口，因此能跟随安装时自动选择的端口和后续端口变更。没有有效配置时，会使用 `http://127.0.0.1:8765/index.html`。
+
+如果面板安装在自定义目录，开启 hook 时传入 `--root /path/to/panel`。也可以用 `--url` 固定面板地址，或用 `CODEX_USAGE_PANEL_URL` 环境变量在运行时覆盖地址。
 
 ## 自定义面板
 
@@ -155,12 +163,23 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --open
 
 ### Release Zip
 
-从 GitHub Releases 下载 `codex-usage-panel-skill.zip`，然后：
+从 [最新 GitHub Release](https://github.com/noskinodesign/codex-usage-panel-skill/releases/latest) 下载 `codex-usage-panel-skill.zip`，然后：
 
 ```bash
 mkdir -p ~/.codex/skills
 unzip codex-usage-panel-skill.zip -d ~/.codex/skills
 ```
+
+### 更新已有安装
+
+如果通过 Git 克隆安装，更新 skill 后重新运行安装器：
+
+```bash
+git -C ~/.codex/skills/codex-usage-panel pull --ff-only
+node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs
+```
+
+如果通过压缩包安装，用最新下载替换 skill 文件夹，再运行同一个安装器。如果已启用自动打开功能，还需重新运行 hook 安装脚本。重新安装会保留面板本地昵称配置和头像。
 
 ## 系统要求
 

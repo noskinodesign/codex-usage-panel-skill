@@ -16,8 +16,10 @@ const required = [
   "SKILL.md",
   "agents",
   "assets",
+  "docs/assets/preview.png",
   "scripts/install-auto-open-hook.mjs",
   "scripts/install-panel.mjs",
+  "scripts/package-skill.mjs",
   "scripts/sync-usage.mjs"
 ];
 
@@ -31,14 +33,14 @@ rmSync(zipPath, { force: true });
 rmSync(stagingRoot, { recursive: true, force: true });
 mkdirSync(path.join(stagingSkill, "scripts"), { recursive: true });
 
-for (const entry of ["SKILL.md", "README.md", "README.zh-CN.md", "LICENSE", "agents", "assets", "examples"]) {
+for (const entry of ["SKILL.md", "README.md", "README.zh-CN.md", "CHANGELOG.md", "LICENSE", "agents", "assets", "examples", "docs/assets/preview.png"]) {
   const source = path.join(repoRoot, entry);
   if (existsSync(source)) {
     cpSync(source, path.join(stagingSkill, entry), { recursive: true });
   }
 }
 
-for (const script of ["install-panel.mjs", "install-auto-open-hook.mjs", "sync-usage.mjs"]) {
+for (const script of ["install-panel.mjs", "install-auto-open-hook.mjs", "package-skill.mjs", "sync-usage.mjs"]) {
   cpSync(path.join(repoRoot, "scripts", script), path.join(stagingSkill, "scripts", script));
 }
 
