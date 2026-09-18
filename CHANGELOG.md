@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Follow the system light/dark appearance across the dashboard, including cards, controls, progress tracks, and the Token heatmap
+- Disable the installed auto-open script when removing the hook, so cached session commands cannot keep opening the panel and stealing conversation focus
+- Document the focus behavior and keep auto-open explicitly opt-in
+- Add regression coverage for repeated removal and cached startup/resume/clear invocations
+
 ## 0.1.7 - 2026-09-07
 
 - Make the auto-open hook follow the installed panel's current port, including automatic port selection and later port changes

@@ -24,6 +24,7 @@
 - 26 周 Token 活动热力图
 - 累计 Token、峰值 Token、最长任务和连续使用天数
 - 一键刷新和折叠视图
+- 跟随系统自动切换浅色与夜间模式
 - 可选的新对话自动打开 hook
 - 英文和中文文档
 
@@ -65,6 +66,8 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-panel.mjs --port 8765 --a
 
 ## 新对话自动打开
 
+自动打开是可选功能，普通安装不会启用。它通过系统打开网址，在对话启动或恢复时可能将面板切到前台，打断对话视图。如果遇到发送消息后面板展开、对话似乎消失的情况，请使用下面的移除命令；面板服务和后台用量同步仍会继续运行。
+
 Codex 目前没有内置设置可以把自定义 HTML 面板固定注入到每一个对话正文里。这个 skill 提供了一个本地 `SessionStart` hook：当 Codex 启动或恢复对话时，自动打开用量面板地址。
 
 开启：
@@ -78,6 +81,8 @@ node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs
 ```bash
 node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
 ```
+
+移除时也会禁用旧脚本，避免已缓存的钩子命令继续打开网址。
 
 第一次运行 hook 时，Codex 可能会要求你 review 并信任它。默认情况下，hook 每次运行都会读取面板当前的本地端口，因此能跟随安装时自动选择的端口和后续端口变更。没有有效配置时，会使用 `http://127.0.0.1:8765/index.html`。
 

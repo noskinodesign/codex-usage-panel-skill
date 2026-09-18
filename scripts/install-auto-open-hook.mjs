@@ -110,6 +110,12 @@ exit 0
 const config = stripAutoOpenHook(readHooksJson());
 
 if (removeHook) {
+  // Running sessions may still hold the old command in memory. Leave its path
+  // executable but inert so a cached invocation cannot steal focus or error.
+  if (existsSync(hookScriptPath)) {
+    writeFileSync(hookScriptPath, "#!/bin/zsh\n# Usage panel auto-open is disabled.\nexit 0\n");
+    chmodSync(hookScriptPath, 0o755);
+  }
   writeHooksJson(config);
   console.log(`Removed Codex usage panel auto-open hook from ${hooksJsonPath}`);
   process.exit(0);

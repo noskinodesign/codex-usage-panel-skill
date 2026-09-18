@@ -28,6 +28,7 @@ A local dashboard for Codex with:
 - A 26-week Token activity heatmap
 - Lifetime tokens, peak token day, longest task, and streak stats
 - One-click refresh and a compact collapsed view
+- Automatic light and dark appearance following the system theme
 - Optional auto-open hook for new Codex conversations
 - English and Chinese docs
 
@@ -73,6 +74,11 @@ avatar files referenced from it, such as `./profile-avatar.png`.
 
 ## Auto-Open in New Conversations
 
+Auto-open is optional and stays off during normal installation. It uses a system
+URL opener, which can bring the panel forward and interrupt the conversation view
+when a session starts or resumes. If that happens, use the removal command below;
+the panel server and background usage sync will keep running.
+
 Codex does not currently have a built-in setting that pins a custom HTML panel
 inside every conversation. This skill includes a local `SessionStart` hook that
 gets you close: when Codex starts or resumes a conversation, the hook opens the
@@ -89,6 +95,8 @@ Remove it:
 ```bash
 node ~/.codex/skills/codex-usage-panel/scripts/install-auto-open-hook.mjs --remove
 ```
+
+Removal also disables the old script so cached hook commands no longer open a URL.
 
 The first time the hook runs, Codex may ask you to review and trust it. By default,
 the hook reads the panel's current local port whenever it runs, so it follows

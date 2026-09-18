@@ -1,7 +1,7 @@
 :root {
-  color-scheme: light;
-  --page: #f6f7f9;
-  --panel: rgba(255, 255, 255, 0.94);
+  color-scheme: light dark;
+  --page: #ffffff;
+  --panel: #ffffff;
   --ink: #20242a;
   --muted: #7a8088;
   --line: #e8ebef;
@@ -12,8 +12,60 @@
   --green-soft: #daf3ea;
   --amber: #a56510;
   --shadow: 0 24px 80px rgba(23, 31, 45, 0.16);
+  --surface: #fff;
+  --topbar: rgba(255, 255, 255, 0.88);
+  --segmented: #f2f4f7;
+  --label: #636a73;
+  --month: #858a91;
+  --reset: #5e6670;
+  --neutral-soft: #f4f5f7;
+  --track: #e4e6e8;
+  --heat-0: #f0f0f1;
+  --heat-1: #d9edff;
+  --heat-2: #b8dcff;
+  --heat-3: #7ebcff;
+  --heat-4: #2f90f7;
+  --segment-shadow: 0 1px 4px rgba(20, 31, 48, 0.1);
+  --page-gradient: none;
   --radius: 8px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #212121;
+    --panel: #212121;
+    --surface: #2f2f2f;
+    --topbar: #212121;
+    --ink: #eef2f7;
+    --muted: #a8b2c1;
+    --label: #a8b2c1;
+    --month: #a8b2c1;
+    --reset: #bec7d4;
+    --line: #3f3f3f;
+    --line-strong: #536278;
+    --segmented: #181818;
+    --blue: #7db4ff;
+    --blue-soft: #203b5b;
+    --green: #68d8b2;
+    --green-soft: #193d34;
+    --amber: #eab76d;
+    --neutral-soft: #303029;
+    --track: #333c48;
+    --heat-0: #282f39;
+    --heat-1: #173e61;
+    --heat-2: #236498;
+    --heat-3: #398dde;
+    --heat-4: #83c3ff;
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+    --segment-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --page-gradient: none;
+  }
+}
+
+button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
 * {
@@ -24,7 +76,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    linear-gradient(180deg, rgba(246, 247, 249, 0.88), rgba(237, 241, 246, 0.96)),
+    var(--page-gradient),
     var(--page);
   color: var(--ink);
 }
@@ -57,7 +109,7 @@ button {
   min-height: 64px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--topbar);
   backdrop-filter: blur(16px);
 }
 
@@ -125,7 +177,7 @@ h2 {
   padding: 3px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #f2f4f7;
+  background: var(--segmented);
 }
 
 .segment {
@@ -140,9 +192,9 @@ h2 {
 }
 
 .segment.is-active {
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 1px 4px rgba(20, 31, 48, 0.1);
+  box-shadow: var(--segment-shadow);
 }
 
 .icon-button {
@@ -152,7 +204,7 @@ h2 {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   cursor: pointer;
 }
@@ -232,7 +284,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   height: 78px;
   border-radius: 999px;
   object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(216, 221, 229, 0.9);
+  box-shadow: 0 0 0 1px var(--line-strong);
 }
 
 .profile-copy {
@@ -253,7 +305,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted);
-  background: #fff;
+  background: var(--surface);
 }
 
 .stats-area {
@@ -284,7 +336,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   padding: 10px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--surface);
   text-align: center;
 }
 
@@ -296,7 +348,7 @@ body:not(.is-collapsed) .collapse-icon::after {
 }
 
 .stat-label {
-  color: #636a73;
+  color: var(--label);
   font-size: 12px;
   line-height: 16px;
 }
@@ -356,23 +408,23 @@ body:not(.is-collapsed) .collapse-icon::after {
   width: 14px;
   height: 14px;
   border-radius: 4px;
-  background: #f0f0f1;
+  background: var(--heat-0);
 }
 
 .cell[data-level="1"] {
-  background: #d9edff;
+  background: var(--heat-1);
 }
 
 .cell[data-level="2"] {
-  background: #b8dcff;
+  background: var(--heat-2);
 }
 
 .cell[data-level="3"] {
-  background: #7ebcff;
+  background: var(--heat-3);
 }
 
 .cell[data-level="4"] {
-  background: #2f90f7;
+  background: var(--heat-4);
 }
 
 .month-row {
@@ -380,7 +432,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   width: 100%;
   height: 24px;
   margin-top: 7px;
-  color: #858a91;
+  color: var(--month);
   font-size: 13px;
   line-height: 20px;
 }
@@ -407,7 +459,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--surface);
 }
 
 .quota-icon {
@@ -427,7 +479,7 @@ body:not(.is-collapsed) .collapse-icon::after {
 }
 
 .quota-item[data-tone="line"] .quota-icon {
-  background: #f4f5f7;
+  background: var(--neutral-soft);
   color: var(--amber);
 }
 
@@ -459,7 +511,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e4e6e8;
+  background: var(--track);
 }
 
 .progress-fill {
@@ -478,7 +530,7 @@ body:not(.is-collapsed) .collapse-icon::after {
 }
 
 .quota-reset {
-  color: #5e6670;
+  color: var(--reset);
   font-size: 15px;
   font-weight: 760;
   white-space: nowrap;
@@ -494,7 +546,7 @@ body:not(.is-collapsed) .collapse-icon::after {
   padding: 0 16px;
   border: 0;
   border-top: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   cursor: pointer;
 }

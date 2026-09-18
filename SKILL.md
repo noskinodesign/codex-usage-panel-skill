@@ -20,6 +20,7 @@ about every 10 seconds.
 ## What This Skill Provides
 
 - A compact local dashboard with profile, remaining usage progress bars, Token activity, and summary stats.
+- Light and dark appearance follows the system automatically through `prefers-color-scheme`, without a separate theme preference.
 - A sync script that reads Codex desktop app-server methods `account/rateLimits/read`, `account/usage/read`, and local account metadata when available.
 - macOS LaunchAgents for a persistent local web server and a persistent usage sync process.
 - An optional SessionStart hook installer that opens the panel when Codex starts or resumes a conversation.
@@ -85,6 +86,10 @@ Run one manual sync after install:
 node ~/.codex-usage-panel/scripts/sync-usage.mjs --root ~/.codex-usage-panel
 ```
 
+Auto-open is opt-in: enable it only when the user explicitly requests it. Its
+system URL opener can switch focus away from the conversation when a session
+starts or resumes. Normal panel installation and repair must not enable it.
+
 Enable auto-open in new Codex conversations:
 
 ```bash
@@ -105,6 +110,11 @@ Remove auto-open:
 ```bash
 node <skill-dir>/scripts/install-auto-open-hook.mjs --remove
 ```
+
+If sending a message brings the panel forward or appears to hide the conversation,
+use `--remove` above. It unregisters the auto-open hook and makes the old script
+inert for sessions that cached its command. The panel server and usage sync keep
+running; open the existing local panel manually when needed.
 
 Build a shareable release zip:
 

@@ -111,3 +111,25 @@ test("reinstallation and removal preserve unrelated hooks without duplicate regi
   assert.deepEqual(config.hooks.PreToolUse, unrelatedToolHook);
   assert.equal(config.customSetting, true);
 });
+
+test("removal makes cached hook invocations inert and remains idempotent", (t) => {
+  const context = fixture(t);
+  install(context);
+  const cachedCommand = JSON.parse(readFileSync(context.hooksPath, "utf8"))
+    .hooks.SessionStart[0].hooks[0].command;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const disabledScript = install(context, ["--remove"]);
+    // Fail safely before executing if removal accidentally leaves a URL opener.
+    assert.doesNotMatch(disabledScript, /\/usr\/bin\/open/);
+    for (const source of ["startup", "resume", "clear"]) {
+      const result = spawnSync(cachedCommand, [], {
+        input: JSON.stringify({ hook_event_name: "SessionStart", source }),
+        encoding: "utf8"
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stdout, "");
+      assert.equal(result.stderr, "");
+    }
+  }
+  assert.equal(JSON.parse(readFileSync(context.hooksPath, "utf8")).hooks.SessionStart, undefined);
+});
